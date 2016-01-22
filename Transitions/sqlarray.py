@@ -6,7 +6,7 @@ numpy arrays can be stored in sql columns.
 A number of additional SQL functions are defined.
 """
 
-from pysqlite2 import dbapi2 as sqlite
+import sqlite3 as sqlite
 import numpy
 from sqlutil import adapt_numpyarray, convert_numpyarray,\
     adapt_object, convert_object
@@ -43,16 +43,16 @@ class SQLarray(object):
 
 
     :Simple SQL functions:
-    
+
     Simple functions transform a single input value into a single output value:
 
-      y = f(x)               SELECT f(x) AS y 
+      y = f(x)               SELECT f(x) AS y
 
     sqrt(x)                  squareroot math.sqrt(x)
     fformat(format,x)        string formatting of a single value format % x
 
 
-    :Aggregate SQL functions: 
+    :Aggregate SQL functions:
 
     Aggregate functions combine data from a query; they are typically used with
     a 'GROUP BY col' clause. They can be thought of as simply numpy ufuncs.
@@ -65,7 +65,7 @@ class SQLarray(object):
 
 
     :PyAggregate SQL functions:
-    
+
     PyAggregate functions act on a list of data points in the same way as
     ordinary aggregate functions but they return python objects such as numpy
     arrays, or tuples of numpy arrays (eg bin edges and histogram). In order to
@@ -86,9 +86,9 @@ class SQLarray(object):
     ------------------------------------------------------------
     array             NumpyArray     array(x)
                                      a standard numpy array
-    histogram         Object         histogram(x,nbins,xmin,xmax) 
+    histogram         Object         histogram(x,nbins,xmin,xmax)
                                      histogram x in nbins evenly spaced bins between xmin and xmax
-    distribution      Object         distribution(x,nbins,xmin,xmax) 
+    distribution      Object         distribution(x,nbins,xmin,xmax)
                                      normalized histogram whose integral gives 1
     meanhistogram     Object         meanhistogram(x,y,nbins,xmin,xmax)
                                      histogram data points y along x and average all y in each bin
@@ -111,8 +111,8 @@ class SQLarray(object):
     >>>  a.sql("CREATE TABLE __self__(a NumpyArray)")
     # then you can simply insert python objects (type(my_array) == numpy.ndarray)
     >>>  a.sql("INSERT INTO __self__(a) values (?)", (my_array,))
-    
-    # when returning results of declared columns one does not have to do anything:    
+
+    # when returning results of declared columns one does not have to do anything:
     >>>  (my_array,) = a.sql("SELECT a FROM __self__")
     # although one can also do
     >>>  (my_array,) = q.sql('SELECT a AS "a [NumpyArray]" FROM __self__')
@@ -132,9 +132,9 @@ class SQLarray(object):
         recarray    numpy record array that describes the layout and initializes the
                     table
         cachesize   number of (query, result) pairs that are chached
-        connection  if not None, reuse this connection; this adds a new table to the same 
-                    database, which allows more complicated queries with cross-joins. The 
-                    table's connection is available as the attribute T.connection. 
+        connection  if not None, reuse this connection; this adds a new table to the same
+                    database, which allows more complicated queries with cross-joins. The
+                    table's connection is available as the attribute T.connection.
         is_tmp      False: default, True: create a tmp table
         """
         self.name = str(name)
@@ -172,7 +172,7 @@ class SQLarray(object):
 
     def merge(self,recarray):
         """Merge another recarray with the same columns into this table.
-        
+
         n = a.merge(<recarray>)
 
         :Arguments:
@@ -187,7 +187,7 @@ class SQLarray(object):
         """
         len_before = len(self)
         #  CREATE TEMP TABLE in database
-        tmparray = SQLarray(self.tmp_table_name, recarray, 
+        tmparray = SQLarray(self.tmp_table_name, recarray,
                             connection=self.connection, is_tmp=True)
         len_tmp = len(tmparray)
         # insert into main table
@@ -209,7 +209,7 @@ class SQLarray(object):
 
         :Arguments:
         name         name of the table in the database (must be compatible with __self__)
-        
+
         :Returns:
         n            number of inserted rows
         """
@@ -296,7 +296,7 @@ class SQLarray(object):
         c.execute(SQL)  # no sanity checks!
         if c.rowcount > 0 or SQL.upper().find('DELETE') > -1:
             # table was (potentially) modified
-            # rowcount does not change for DELETE, see 
+            # rowcount does not change for DELETE, see
             # http://oss.itsystementwicklung.de/download/pysqlite/doc/sqlite3.html#cursor-objects
             # so we catch this case manually and invalidate the whole cache
             self.__cache.clear()
@@ -322,7 +322,7 @@ class SQLarray(object):
     def _init_sqlite_functions(self):
         """additional SQL functions to the database"""
         import sqlfunctions
-                
+
         self.connection.create_function("sqrt", 1,sqlfunctions._sqrt)
         self.connection.create_function("fformat",2,sqlfunctions._fformat)
         self.connection.create_aggregate("std",1,sqlfunctions._Stdev)
@@ -343,7 +343,7 @@ class SQLarray(object):
 
     def __del__(self):
         """Delete the underlying SQL table from the database."""
-        SQL = """DROP TABLE IF EXISTS __self__""" 
+        SQL = """DROP TABLE IF EXISTS __self__"""
         self.sql(SQL)
 
 # Ring buffer (from hop.utilities)
@@ -443,5 +443,5 @@ class KRingbuffer(dict):
         raise NotImplementedError('Only pop() is supported.')
     def update(self,*args,**kwargs):
         raise NotImplementedError('Only append() is supported.')
-        
+
 
