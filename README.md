@@ -21,8 +21,7 @@ If you use code from this repository in academic work, please cite
 the above paper.
 
 See also:
-*
-[AKeco Structure Library](https://becksteinlab.physics.asu.edu/resources/73/akeco-structure-library)
-*
-[AdK apo PMF](https://becksteinlab.physics.asu.edu/research/52/adk-apo-pmf)
+
+- [AKeco Structure Library](https://becksteinlab.physics.asu.edu/resources/73/akeco-structure-library)
+- [AdK apo PMF](https://becksteinlab.physics.asu.edu/research/52/adk-apo-pmf)
 
